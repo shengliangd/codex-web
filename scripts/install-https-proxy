@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${EUID}" -ne 0 ]]; then
+  echo "Run this installer as root." >&2
+  exit 1
+fi
+
+if ! command -v nginx >/dev/null 2>&1 || ! command -v htpasswd >/dev/null 2>&1; then
+  TMPDIR=/var/tmp apt-get update
+  TMPDIR=/var/tmp DEBIAN_FRONTEND=noninteractive apt-get install -y nginx apache2-utils
+fi
+
+if [[ ! -t 0 ]]; then
+  echo "Run this installer from an interactive terminal so the password is not exposed." >&2
+  exit 1
+fi
+
+read -r -s -p "Basic Auth password for codex: " password
+printf '\n'
+read -r -s -p "Repeat password: " confirmation
+printf '\n'
+
+if [[ -z "${password}" || "${password}" != "${confirmation}" ]]; then
+  echo "Passwords are empty or do not match." >&2
+  exit 1
+fi
+
+install -d -m 700 /etc/nginx/certs
+install -d -m 755 /etc/nginx/auth
+
+if [[ ! -f /etc/nginx/certs/codex-web.crt || ! -f /etc/nginx/certs/codex-web.key ]]; then
+  openssl req -x509 -newkey rsa:2048 -sha256 -nodes -days 365 \
+    -subj "/CN=$(hostname -f 2>/dev/null || hostname)" \
+    -keyout /etc/nginx/certs/codex-web.key \
+    -out /etc/nginx/certs/codex-web.crt
+  chmod 600 /etc/nginx/certs/codex-web.key
+fi
+
+htpasswd -Bci /etc/nginx/auth/codex-web codex <<<"${password}"
+chown root:www-data /etc/nginx/auth/codex-web
+chmod 640 /etc/nginx/auth/codex-web
+unset password confirmation
+
+cat >/etc/nginx/conf.d/codex-web.conf <<'EOF'
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen 8443 ssl;
+    server_name _;
+
+    ssl_certificate /etc/nginx/certs/codex-web.crt;
+    ssl_certificate_key /etc/nginx/certs/codex-web.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    auth_basic "Codex Web";
+    auth_basic_user_file /etc/nginx/auth/codex-web;
+
+    location / {
+        proxy_pass http://127.0.0.1:8214;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 3600;
+    }
+}
+EOF
+
+nginx -t
+if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nginx 2>/dev/null; then
+  systemctl reload nginx
+else
+  nginx
+fi
+
+echo "codex-web HTTPS proxy is listening on https://0.0.0.0:8443"
