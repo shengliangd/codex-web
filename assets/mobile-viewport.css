@@ -1,0 +1,29 @@
+:root {
+  --codex-mobile-viewport-height: 100dvh;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  html,
+  body {
+    width: 100%;
+    height: var(--codex-mobile-viewport-height) !important;
+    max-height: var(--codex-mobile-viewport-height);
+    overflow: hidden;
+  }
+
+  body {
+    overscroll-behavior: none;
+  }
+
+  #root {
+    height: 100% !important;
+    min-height: 0;
+    min-block-size: 0;
+    overflow: hidden;
+  }
+
+  [data-thread-scroll-footer="true"] {
+    box-sizing: border-box;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
