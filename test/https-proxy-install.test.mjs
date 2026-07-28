@@ -12,6 +12,11 @@ test("HTTPS proxy installer keeps credentials out of the repository", async () =
   assert.match(installer, /htpasswd -Bci .* <<<"\$\{password\}"/);
   assert.match(installer, /openssl req -x509/);
   assert.match(installer, /auth_basic_user_file/);
+  assert.match(installer, /auth_basic \$codex_auth_realm/);
+  assert.match(installer, /openssl rand -hex 32/);
+  assert.match(installer, /Max-Age=1209600/);
+  assert.match(installer, /HttpOnly/);
+  assert.match(installer, /SameSite=Lax/);
   assert.match(installer, /proxy_pass http:\/\/127\.0\.0\.1:8214/);
   assert.match(installer, /proxy_set_header Upgrade/);
   assert.match(installer, /TMPDIR=\/var\/tmp apt-get update/);

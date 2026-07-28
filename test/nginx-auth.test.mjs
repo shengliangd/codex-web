@@ -15,7 +15,7 @@ test("successful Basic Auth login issues a persistent trusted-device cookie", as
     nginxConfig,
     /add_header Set-Cookie \$codex_remember_cookie always;/,
   );
-  assert.match(nginxConfig, /Max-Age=2592000/);
+  assert.match(nginxConfig, /Max-Age=1209600/);
   assert.match(nginxConfig, /HttpOnly/);
   assert.match(nginxConfig, /SameSite=Lax/);
 });
