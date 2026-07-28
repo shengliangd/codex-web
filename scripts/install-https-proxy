@@ -42,10 +42,24 @@ chown root:www-data /etc/nginx/auth/codex-web
 chmod 640 /etc/nginx/auth/codex-web
 unset password confirmation
 
+trust_token="$(openssl rand -hex 32)"
+
 cat >/etc/nginx/conf.d/codex-web.conf <<'EOF'
+map_hash_bucket_size 128;
+
 map $http_upgrade $connection_upgrade {
     default upgrade;
     '' close;
+}
+
+map $cookie_codex_remember $codex_auth_realm {
+    default "Codex Web";
+    "__CODEX_TRUST_TOKEN__" off;
+}
+
+map $codex_auth_realm $codex_remember_cookie {
+    default "codex_remember=__CODEX_TRUST_TOKEN__; Path=/; Max-Age=1209600; Secure; HttpOnly; SameSite=Lax";
+    off "";
 }
 
 server {
@@ -56,7 +70,7 @@ server {
     ssl_certificate_key /etc/nginx/certs/codex-web.key;
     ssl_protocols TLSv1.2 TLSv1.3;
 
-    auth_basic "Codex Web";
+    auth_basic $codex_auth_realm;
     auth_basic_user_file /etc/nginx/auth/codex-web;
 
     location / {
@@ -68,9 +82,13 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_read_timeout 3600;
+        add_header Set-Cookie $codex_remember_cookie;
     }
 }
 EOF
+
+sed -i "s/__CODEX_TRUST_TOKEN__/${trust_token}/g" /etc/nginx/conf.d/codex-web.conf
+unset trust_token
 
 nginx -t
 if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nginx 2>/dev/null; then
