@@ -10,6 +10,7 @@
   ],
   "bin": "src/server/main.js",
   "scripts": {
+    "start": "./scripts/start",
     "test": "node --test test/*.test.mjs",
     "prepare": "./scripts/prepare && npm run build:browser && npm run build:server",
     "build": "npm run prepare:asar && npm run build:browser && npm run build:server",

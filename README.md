@@ -23,8 +23,11 @@ to the codex desktop app can be integrated quickly.
 `codex-web` serves the browser client and hosts the desktop-side bridge. by
 default, it listens on `127.0.0.1:8214`.
 
-it will use `codex` from `PATH` if available, or `CODEX_CLI_PATH` if you set
-it.
+`npm start` connects to the per-user app-server socket at
+`/tmp/codex-app-server-$UID/control.sock`. if no app-server is running there, it
+starts one with `codex` from `PATH` and waits for it to become ready. set
+`CODEX_UNIX_SOCKET` to use another socket, or `CODEX_APP_SERVER_CLI` to select a
+different Codex CLI binary.
 
 run it with `npx`:
 

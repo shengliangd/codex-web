@@ -6,6 +6,13 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+webview_source="${CODEX_WEBVIEW_ROOT:-${script_dir}/../scratch/asar/webview}"
+if [[ ! -f "${webview_source}/index.html" ]]; then
+  echo "Codex webview not found at ${webview_source}" >&2
+  exit 1
+fi
+
 if ! command -v nginx >/dev/null 2>&1 || ! command -v htpasswd >/dev/null 2>&1; then
   TMPDIR=/var/tmp apt-get update
   TMPDIR=/var/tmp DEBIAN_FRONTEND=noninteractive apt-get install -y nginx apache2-utils
@@ -28,6 +35,16 @@ fi
 
 install -d -m 700 /etc/nginx/certs
 install -d -m 755 /etc/nginx/auth
+install -d -m 755 /srv/codex-web/webview
+cp -a "${webview_source}/." /srv/codex-web/webview/
+find /srv/codex-web/webview -type f \
+  \( -name '*.css' -o -name '*.js' -o -name '*.json' -o -name '*.svg' -o -name '*.wasm' \) \
+  -size +1024c -exec sh -c '
+    for file do
+      gzip -c -6 -- "$file" >"${file}.gz.tmp"
+      mv -f -- "${file}.gz.tmp" "${file}.gz"
+    done
+  ' sh {} +
 
 if [[ ! -f /etc/nginx/certs/codex-web.crt || ! -f /etc/nginx/certs/codex-web.key ]]; then
   openssl req -x509 -newkey rsa:2048 -sha256 -nodes -days 365 \
@@ -63,17 +80,73 @@ map $codex_auth_realm $codex_remember_cookie {
 }
 
 server {
-    listen 8443 ssl;
+    listen 8443 ssl http2;
     server_name _;
 
     ssl_certificate /etc/nginx/certs/codex-web.crt;
     ssl_certificate_key /etc/nginx/certs/codex-web.key;
     ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:CodexWebSSL:10m;
+    ssl_session_timeout 1d;
 
     auth_basic $codex_auth_realm;
     auth_basic_user_file /etc/nginx/auth/codex-web;
 
-    location / {
+    gzip on;
+    gzip_static on;
+    gzip_comp_level 6;
+    gzip_proxied any;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types application/javascript application/json application/wasm image/svg+xml text/css text/javascript;
+
+    location = /manifest.json {
+        auth_basic off;
+        root /srv/codex-web/webview;
+        expires 1d;
+        add_header Cache-Control "public, max-age=86400" always;
+    }
+
+    location = /favicon.svg {
+        auth_basic off;
+        root /srv/codex-web/webview;
+        expires 365d;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+    }
+
+    location = /assets/pwa-icon-512.png {
+        auth_basic off;
+        alias /srv/codex-web/webview/assets/pwa-icon-512.png;
+        expires 365d;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+    }
+
+    location = /assets/preload.js {
+        alias /srv/codex-web/webview/assets/preload.js;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    location ^~ /assets/ {
+        alias /srv/codex-web/webview/assets/;
+        expires 365d;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        access_log off;
+    }
+
+    location = / {
+        root /srv/codex-web/webview;
+        try_files /index.html =404;
+        add_header Cache-Control "no-cache" always;
+        add_header Set-Cookie $codex_remember_cookie;
+    }
+
+    location = /index.html {
+        root /srv/codex-web/webview;
+        add_header Cache-Control "no-cache" always;
+        add_header Set-Cookie $codex_remember_cookie;
+    }
+
+    location ^~ /__backend/ {
         proxy_pass http://127.0.0.1:8214;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -82,6 +155,17 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_read_timeout 3600;
+    }
+
+    location ^~ /@fs/ {
+        proxy_pass http://127.0.0.1:8214;
+        proxy_set_header Host $host;
+    }
+
+    location / {
+        root /srv/codex-web/webview;
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache" always;
         add_header Set-Cookie $codex_remember_cookie;
     }
 }

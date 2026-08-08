@@ -19,3 +19,17 @@ test("successful Basic Auth login issues a persistent trusted-device cookie", as
   assert.match(nginxConfig, /HttpOnly/);
   assert.match(nginxConfig, /SameSite=Lax/);
 });
+
+test("hashed assets are compressed and cached without caching preload", async () => {
+  const nginxConfig = await readFile(
+    new URL("../examples/nginx/codex-web.conf", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(nginxConfig, /listen 8443 ssl http2;/);
+  assert.match(nginxConfig, /gzip_static on;/);
+  assert.match(nginxConfig, /gzip_proxied any;/);
+  assert.match(nginxConfig, /location = \/assets\/preload\.js/);
+  assert.match(nginxConfig, /location \^~ \/assets\//);
+  assert.match(nginxConfig, /max-age=31536000, immutable/);
+});
