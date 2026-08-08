@@ -23,4 +23,10 @@ test("HTTPS proxy installer keeps credentials out of the repository", async () =
   assert.match(installer, /install -d -m 755 \/etc\/nginx\/auth/);
   assert.match(installer, /chown root:www-data \/etc\/nginx\/auth\/codex-web/);
   assert.match(installer, /chmod 640 \/etc\/nginx\/auth\/codex-web/);
+  assert.match(installer, /CODEX_WEBVIEW_ROOT/);
+  assert.match(installer, /cp -a .*webview_source/);
+  assert.match(installer, /gzip -c -6/);
+  assert.match(installer, /listen 8443 ssl http2/);
+  assert.match(installer, /gzip_static on/);
+  assert.match(installer, /max-age=31536000, immutable/);
 });
