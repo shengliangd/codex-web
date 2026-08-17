@@ -27,6 +27,10 @@ test("HTTPS proxy installer keeps credentials out of the repository", async () =
   assert.match(installer, /cp -a .*webview_source/);
   assert.match(installer, /gzip -c -6/);
   assert.match(installer, /listen 8443 ssl http2/);
+  assert.match(installer, /send_timeout 300s/);
   assert.match(installer, /gzip_static on/);
-  assert.match(installer, /max-age=31536000, immutable/);
+  assert.match(
+    installer,
+    /add_header Cache-Control "public, max-age=31536000, immutable" always;/,
+  );
 });

@@ -81,6 +81,7 @@ map $codex_auth_realm $codex_remember_cookie {
 
 server {
     listen 8443 ssl http2;
+    send_timeout 300s;
     server_name _;
 
     ssl_certificate /etc/nginx/certs/codex-web.crt;
