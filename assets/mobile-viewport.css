@@ -28,10 +28,6 @@
     min-height: 0;
   }
 
-  html[data-codex-mobile-platform="android"] [data-codex-composer-root] {
-    translate: 0 -1rem;
-  }
-
   [data-thread-scroll-footer="true"] {
     box-sizing: border-box;
     padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
