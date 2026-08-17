@@ -568,6 +568,7 @@ class BrowserWindow {
     log(`BrowserWindow#${this.id}.destroy`, []);
     if (this.destroyed) return;
     this.destroyed = true;
+    this.visible = false;
     (this.webContents.emit as StubFunction)("destroyed");
     BrowserWindow.allWindows = BrowserWindow.allWindows.filter(
       (window) => window !== this,
@@ -589,6 +590,7 @@ class BrowserWindow {
   }
 
   isVisible(): boolean {
+    log(`BrowserWindow#${this.id}.isVisible`, []);
     return this.visible && !this.destroyed;
   }
 
@@ -634,6 +636,18 @@ class BrowserWindow {
   hide(): void {
     log(`BrowserWindow#${this.id}.hide`, []);
     this.visible = false;
+  }
+
+  setBackgroundColor(value: string): void {
+    log(`BrowserWindow#${this.id}.setBackgroundColor`, [value]);
+  }
+
+  setBackgroundMaterial(value: unknown): void {
+    log(`BrowserWindow#${this.id}.setBackgroundMaterial`, [value]);
+  }
+
+  setVibrancy(value: unknown): void {
+    log(`BrowserWindow#${this.id}.setVibrancy`, [value]);
   }
 
   focus(): void {
