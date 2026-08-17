@@ -417,6 +417,7 @@ class BrowserWindow {
   static focusedWindow: BrowserWindow | null = null;
   id: number;
   private destroyed = false;
+  private visible = false;
   private title = "Codex";
   private bounds = { x: 0, y: 0, width: 1280, height: 820 };
   webContents: Record<string, unknown>;
@@ -426,6 +427,12 @@ class BrowserWindow {
     log("new BrowserWindow", args);
     this.id = BrowserWindow.nextId++;
     this.emitter = createEmitterStub(`BrowserWindow#${this.id}`);
+    const options = args[0];
+    this.visible =
+      typeof options === "object" &&
+      options !== null &&
+      "show" in options &&
+      options.show === true;
 
     const webContentsEmitter = createEmitterStub(
       `BrowserWindow#${this.id}.webContents`,
@@ -483,9 +490,7 @@ class BrowserWindow {
       },
     );
 
-    BrowserWindow.allWindows.push(this);
-    BrowserWindow.focusedWindow = this;
-    return new Proxy(this, {
+    const windowProxy = new Proxy(this, {
       get: (target, prop) => {
         if (prop in target) {
           return target[prop as keyof typeof target];
@@ -493,6 +498,9 @@ class BrowserWindow {
         return createDeepStub(`BrowserWindow#${target.id}.${String(prop)}`);
       },
     });
+    BrowserWindow.allWindows.push(windowProxy);
+    BrowserWindow.focusedWindow = windowProxy;
+    return windowProxy;
   }
 
   static getAllWindows(): BrowserWindow[] {
@@ -560,6 +568,7 @@ class BrowserWindow {
   destroy(): void {
     log(`BrowserWindow#${this.id}.destroy`, []);
     this.destroyed = true;
+    this.visible = false;
     if (BrowserWindow.focusedWindow === this) {
       BrowserWindow.focusedWindow = null;
     }
@@ -574,6 +583,11 @@ class BrowserWindow {
   isFocused(): boolean {
     log(`BrowserWindow#${this.id}.isFocused`, []);
     return BrowserWindow.focusedWindow === this && !this.destroyed;
+  }
+
+  isVisible(): boolean {
+    log(`BrowserWindow#${this.id}.isVisible`, []);
+    return this.visible && !this.destroyed;
   }
 
   removeMenu(): void {
@@ -612,10 +626,24 @@ class BrowserWindow {
 
   show(): void {
     log(`BrowserWindow#${this.id}.show`, []);
+    this.visible = true;
   }
 
   hide(): void {
     log(`BrowserWindow#${this.id}.hide`, []);
+    this.visible = false;
+  }
+
+  setBackgroundColor(value: string): void {
+    log(`BrowserWindow#${this.id}.setBackgroundColor`, [value]);
+  }
+
+  setBackgroundMaterial(value: unknown): void {
+    log(`BrowserWindow#${this.id}.setBackgroundMaterial`, [value]);
+  }
+
+  setVibrancy(value: unknown): void {
+    log(`BrowserWindow#${this.id}.setVibrancy`, [value]);
   }
 
   focus(): void {
