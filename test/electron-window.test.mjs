@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { BrowserWindow } from "../src/server/electron/index.js";
+globalThis.__CODEX_SHIM_VALUES__ = {
+  appPath: "/tmp/codex-web-app",
+  version: "test-version",
+};
+
+const { app, BrowserWindow } = await import("../src/server/electron/index.js");
+
+test("Electron app metadata points at the extracted upstream app", () => {
+  assert.equal(app.getAppPath(), "/tmp/codex-web-app");
+  assert.equal(app.getVersion(), "test-version");
+});
 
 test("BrowserWindow preserves its proxy and supports backdrop refreshes", () => {
   const window = new BrowserWindow({ show: false });
