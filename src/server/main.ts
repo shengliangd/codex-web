@@ -2,6 +2,7 @@
 
 declare global {
   var __CODEX_SHIM_VALUES__: {
+    appPath: string;
     version: string;
   };
 }
@@ -623,14 +624,23 @@ async function startIpcBridgeServer(options: ServerOptions): Promise<void> {
   ensureElectronLikeProcessContext();
   installModuleAliasHook();
 
+  const appPath = path.resolve(__dirname, "../../scratch/asar");
   const packageJson = JSON.parse(
     await fs.readFile(
-      path.resolve(__dirname, "../../scratch/asar/package.json"),
+      path.join(appPath, "package.json"),
       "utf8",
     ),
   );
 
+  if (
+    !process.env.BUILD_FLAVOR &&
+    typeof packageJson.codexBuildFlavor === "string"
+  ) {
+    process.env.BUILD_FLAVOR = packageJson.codexBuildFlavor;
+  }
+
   globalThis.__CODEX_SHIM_VALUES__ = {
+    appPath,
     version: packageJson.version,
   };
 

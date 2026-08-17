@@ -335,7 +335,7 @@ const appBase = {
   },
   getAppPath(): string {
     log("app.getAppPath", []);
-    return process.cwd();
+    return globalThis.__CODEX_SHIM_VALUES__.appPath;
   },
   async getGPUInfo(infoLevel: string): Promise<{ gpuDevice: unknown[] }> {
     log("app.getGPUInfo", [infoLevel]);
