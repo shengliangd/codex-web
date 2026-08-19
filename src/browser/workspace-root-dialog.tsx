@@ -106,7 +106,8 @@ function WorkspaceRootDialog({
         ].join(" ")}
         data-state="open"
         onClick={() => onClose(null)}
-        style={{ pointerEvents: "auto" }}
+        onPointerDown={(event) => event.stopPropagation()}
+        style={{ pointerEvents: "auto", zIndex: 100 }}
       />
       <div
         aria-describedby={DESCRIPTION_ID}
@@ -133,9 +134,10 @@ function WorkspaceRootDialog({
           "w-[520px]",
         ].join(" ")}
         data-state="open"
+        onPointerDown={(event) => event.stopPropagation()}
         ref={dialogRef}
         role="dialog"
-        style={{ pointerEvents: "auto" }}
+        style={{ pointerEvents: "auto", zIndex: 101 }}
         tabIndex={-1}
       >
         <form
