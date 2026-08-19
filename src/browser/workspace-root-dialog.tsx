@@ -70,6 +70,38 @@ function WorkspaceRootDialog({
   }, []);
 
   useEffect(() => {
+    // The Desktop project dialog uses react-remove-scroll, which treats this
+    // body-level portal as outside its scrollable shards. Stop its document
+    // listener from cancelling gestures while preserving the browser default.
+    function preserveDialogScroll(event: Event): void {
+      const target = event.target;
+      if (target instanceof Node && dialogRef.current?.contains(target)) {
+        event.stopPropagation();
+      }
+    }
+
+    const listenerOptions: AddEventListenerOptions = {
+      capture: true,
+      passive: true,
+    };
+    window.addEventListener("wheel", preserveDialogScroll, listenerOptions);
+    window.addEventListener("touchmove", preserveDialogScroll, listenerOptions);
+
+    return () => {
+      window.removeEventListener(
+        "wheel",
+        preserveDialogScroll,
+        listenerOptions,
+      );
+      window.removeEventListener(
+        "touchmove",
+        preserveDialogScroll,
+        listenerOptions,
+      );
+    };
+  }, []);
+
+  useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -312,6 +344,7 @@ function WorkspaceRootDialog({
                     </div>
 
                     <div
+                      aria-label="Folders"
                       className={[
                         "min-h-0",
                         "flex-1",
@@ -322,6 +355,13 @@ function WorkspaceRootDialog({
                         "rounded-lg",
                         "border",
                       ].join(" ")}
+                      role="region"
+                      style={{
+                        overscrollBehavior: "contain",
+                        touchAction: "pan-y",
+                        WebkitOverflowScrolling: "touch",
+                      }}
+                      tabIndex={0}
                     >
                       <div
                         className={["flex", "w-full", "flex-col", "py-1"].join(
