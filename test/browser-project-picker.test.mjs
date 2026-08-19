@@ -29,3 +29,21 @@ test("the browser folder picker stays above the Desktop project dialog", async (
     2,
   );
 });
+
+test("the browser folder picker bypasses the Desktop dialog scroll lock", async () => {
+  const source = await readFile(
+    new URL("../src/browser/workspace-root-dialog.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(
+    source,
+    /window\.addEventListener\("wheel", preserveDialogScroll, listenerOptions\)/,
+  );
+  assert.match(
+    source,
+    /window\.addEventListener\("touchmove", preserveDialogScroll, listenerOptions\)/,
+  );
+  assert.match(source, /touchAction: "pan-y"/);
+  assert.match(source, /overscrollBehavior: "contain"/);
+});
