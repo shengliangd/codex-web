@@ -20,10 +20,11 @@ the context the patches were being applied in.
 
 ## updating urls
 
-there are a few places to update next.
+the desktop version has one source of truth. update it first, then refresh the
+Nix fixed-output hash.
 
-1. `appVersion` in default.nix and `hash` in `codexZip`.
-2. `APP_VERSION` in ./scripts/prepare
+1. the version in `CODEX_DESKTOP_VERSION`.
+2. `hash` in `codexZip` in `default.nix`.
 
 then temporarily comment out the patch lines in ./scripts/prepare_asar and run
 
