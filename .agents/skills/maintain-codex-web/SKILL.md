@@ -59,7 +59,7 @@ Use the formal clean build entry:
 npm run prepare
 ```
 
-Do not use bare `npm run build` unless `HOSTED_CODEX_APP_ZIP` is intentionally supplied; `prepare:asar` requires that variable. The formal `prepare` command downloads the version in `CODEX_DESKTOP_VERSION` and then builds browser and server output.
+Do not use bare `npm run build` unless `HOSTED_CODEX_APP_ZIP` is intentionally supplied; `prepare:asar` requires that variable. The formal `prepare` command reuses a validated, versioned Desktop archive from `${CODEX_WEB_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/codex-web}`. It downloads the version in `CODEX_DESKTOP_VERSION` only when that cache entry is missing or invalid, then builds browser and server output. Do not delete this cache between ordinary changes.
 
 ## Verify In Proportion To The Change
 

@@ -12,8 +12,16 @@ create a separate application mode or parallel persisted state.
 - Do not distinguish navigation regions with large gray fills. Use white space,
   a black separator, and a black active marker instead.
 - Keep text fields and the composer visibly bounded at rest. Use a complete
-  one-pixel black border and a two-pixel focus outline that does not change the
-  control's layout.
+  one-pixel black border. On focus, replace it with a three-pixel CSS `double`
+  border so both lines remain inside the composer and cannot be clipped by an
+  overflow-hidden ancestor.
+- Border `.composer-surface-chrome`, not `[data-codex-composer-root]`. The root
+  also contains above-composer portals such as diff statistics, so framing it
+  makes floating badges collide with the input boundary.
+- Draw the composer frame with a pointer-transparent positioned pseudo-element.
+  Composer children can paint over a border on the surface itself; the overlay
+  keeps the resting border visible and switches to the focus double border on
+  the same layer.
 - Keep essential text at least WCAG 2.2 AA contrast. Keep control boundaries and
   state indicators at least 3:1 against adjacent colors. `#767676` on white is
   the lightest reference border in this theme; use black for primary inputs.
@@ -21,6 +29,8 @@ create a separate application mode or parallel persisted state.
   backdrop is acceptable; translucent material effects are not.
 - Do not erase selected, hover, or focus state merely to remove gray. Replace
   fill-only state with borders, outlines, underlines, or monochrome markers.
+- When a selected row uses a leading border as its marker, remove inherited
+  pill rounding from that row so the marker remains rectangular.
 
 ## Primary Sources
 

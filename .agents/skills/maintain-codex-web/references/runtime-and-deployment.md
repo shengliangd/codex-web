@@ -41,11 +41,13 @@ An already loaded ES module remains in the current SPA even when Nginx sends `Ca
 
 1. Confirm `CODEX_DESKTOP_VERSION` is the intended single source of truth.
 2. Run `npm test` and `git diff --check` before the expensive build.
-3. Run `npm run prepare`; monitor the download, extraction, every patch hunk, Vite, and `tsc`.
+3. Run `npm run prepare`; reuse its validated versioned archive cache and monitor any required download, extraction, every patch hunk, Vite, and `tsc`.
 4. Confirm semantic changes in all expected generated bundles with `rg`.
 5. Run the focused test and full test suite again when generation could affect behavior.
 
 `npm run build` calls `prepare:asar` directly and fails without `HOSTED_CODEX_APP_ZIP`. Do not interpret that environment error as a code failure or bypass the pinned download with an arbitrary Desktop archive.
+
+`scripts/prepare` stores the pinned archive under the user cache directory (or `CODEX_WEB_CACHE_DIR`) and validates it with `unzip -tq` before reuse. Keep the archive version in its filename, download through a partial file, and move it into place only after validation so repeated clean builds do not redownload the large Desktop bundle.
 
 ## Production Checklist
 
