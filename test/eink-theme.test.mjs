@@ -83,7 +83,22 @@ test("E-ink hardening removes translucent materials and motion", async () => {
   assert.match(css, /--color-token-input-border:\s*#000000/);
   assert.match(css, /\[data-app-action-sidebar-scroll\]/);
   assert.match(css, /border-inline-end:\s*1px solid #000000/);
-  assert.match(css, /\[data-codex-composer-root\]/);
-  assert.match(css, /border:\s*1px solid #000000\s*!important/);
-  assert.match(css, /outline:\s*2px solid #000000\s*!important/);
+  assert.match(
+    css,
+    /\[data-app-action-sidebar-thread-active="true"\][^{]*\{[^}]*border-radius:\s*0\s*!important/s,
+  );
+  assert.doesNotMatch(css, /\[data-codex-composer-root\]/);
+  assert.match(css, /\.composer-surface-chrome/);
+  assert.match(
+    css,
+    /\.composer-surface-chrome[^{]*\{[^}]*border-radius:\s*0\s*!important/s,
+  );
+  assert.match(
+    css,
+    /\.composer-surface-chrome::after[^{]*\{[^}]*border:\s*1px solid #000000[^}]*pointer-events:\s*none[^}]*position:\s*absolute/s,
+  );
+  assert.match(css, /\.composer-surface-chrome:focus-within::after/);
+  assert.match(css, /border:\s*3px double #000000/);
+  assert.doesNotMatch(css, /outline-offset/);
+  assert.doesNotMatch(css, /--color-token-border(?:-default|-heavy|-light)?:/);
 });

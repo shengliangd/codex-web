@@ -5,11 +5,21 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPOSITORY_ROOT="$(dirname -- "$SCRIPT_DIR")"
 cd "$REPOSITORY_ROOT"
 
-TEMP_DIR="$(mktemp -d)"
-
 APP_VERSION="$(tr -d '\r\n' < "$REPOSITORY_ROOT/CODEX_DESKTOP_VERSION")"
-curl -o "$TEMP_DIR/file.zip" "https://persistent.oaistatic.com/codex-app-prod/ChatGPT-darwin-arm64-$APP_VERSION.zip"
+CACHE_ROOT="${CODEX_WEB_CACHE_DIR:-${XDG_CACHE_HOME:-${HOME}/.cache}/codex-web}"
+ARCHIVE_NAME="ChatGPT-darwin-arm64-$APP_VERSION.zip"
+ARCHIVE_PATH="$CACHE_ROOT/$ARCHIVE_NAME"
 
-HOSTED_CODEX_APP_ZIP="$TEMP_DIR/file.zip" bash "$SCRIPT_DIR/prepare_asar"
+mkdir -p "$CACHE_ROOT"
 
-rm -rf "$TEMP_DIR"
+if ! unzip -tq "$ARCHIVE_PATH" >/dev/null 2>&1; then
+  PARTIAL_ARCHIVE="$ARCHIVE_PATH.part"
+  trap 'rm -f "$PARTIAL_ARCHIVE"' EXIT
+  curl --fail --location --retry 3 --output "$PARTIAL_ARCHIVE" \
+    "https://persistent.oaistatic.com/codex-app-prod/$ARCHIVE_NAME"
+  unzip -tq "$PARTIAL_ARCHIVE" >/dev/null
+  mv -f "$PARTIAL_ARCHIVE" "$ARCHIVE_PATH"
+  trap - EXIT
+fi
+
+HOSTED_CODEX_APP_ZIP="$ARCHIVE_PATH" bash "$SCRIPT_DIR/prepare_asar"
