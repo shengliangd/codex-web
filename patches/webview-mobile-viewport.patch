@@ -12,11 +12,12 @@
      <title>Codex</title>
      <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
      <link rel="manifest" href="/manifest.json" />
-@@ -161,6 +164,8 @@
+@@ -161,6 +164,9 @@
        crossorigin
        href="./assets/app-initial~app-main~hotkey-window-thread-page~thread-app-shell-chrome~header~remote-conver~h59fr3q5-gcDk1du5.css"
      />
 +    <link rel="stylesheet" href="./mobile-viewport.css" />
++    <link rel="stylesheet" href="./eink-theme.css" />
 +    <script src="./mobile-viewport.js"></script>
    </head>
    <body tabindex="0" style="outline: none">

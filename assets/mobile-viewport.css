@@ -28,6 +28,16 @@
     min-height: 0;
   }
 
+  [data-app-action-sidebar-scroll] {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+
+  [data-app-action-sidebar-scroll] [role="listitem"].touch-none {
+    touch-action: pan-y !important;
+  }
+
   [data-thread-scroll-footer="true"] {
     box-sizing: border-box;
     padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;

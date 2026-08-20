@@ -45,6 +45,7 @@ find /srv/codex-web/webview -type f \
       mv -f -- "${file}.gz.tmp" "${file}.gz"
     done
   ' sh {} +
+find /srv/codex-web/webview -type f -name '*.gz' -exec chmod 644 {} +
 
 if [[ ! -f /etc/nginx/certs/codex-web.crt || ! -f /etc/nginx/certs/codex-web.key ]]; then
   openssl req -x509 -newkey rsa:2048 -sha256 -nodes -days 365 \
@@ -124,6 +125,35 @@ server {
 
     location = /assets/preload.js {
         alias /srv/codex-web/webview/assets/preload.js;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    # Cached copies of the previous page shell still request this retired
+    # sidecar. Serve the inert compatibility shim instead of the SPA fallback.
+    location = /eink-theme.js {
+        alias /srv/codex-web/webview/eink-theme.js;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    # These upstream-named bundles are patched locally, so their filenames do
+    # not change when their contents do. Always revalidate them after deploys.
+    location = /assets/app-initial~app-main~page-BF1QkwFT.js {
+        alias /srv/codex-web/webview/assets/app-initial~app-main~page-BF1QkwFT.js;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    location = /assets/app-initial~app-main~hotkey-window-thread-page~thread-app-shell-chrome~header~remote-conver~h59fr3q5-Cm3GYhJA.js {
+        alias /srv/codex-web/webview/assets/app-initial~app-main~hotkey-window-thread-page~thread-app-shell-chrome~header~remote-conver~h59fr3q5-Cm3GYhJA.js;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    location = /assets/app-initial~app-main~settings-page~appearance-settings~general-settings-DyXXbsyx.js {
+        alias /srv/codex-web/webview/assets/app-initial~app-main~settings-page~appearance-settings~general-settings-DyXXbsyx.js;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    location = /assets/app-initial~app-main~appgen-settings-page~settings-page~skills-settings~plugins-settings~re~n7kg4zj6-CoJ-ih-g.js {
+        alias /srv/codex-web/webview/assets/app-initial~app-main~appgen-settings-page~settings-page~skills-settings~plugins-settings~re~n7kg4zj6-CoJ-ih-g.js;
         add_header Cache-Control "no-cache" always;
     }
 

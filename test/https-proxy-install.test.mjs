@@ -31,6 +31,30 @@ test("HTTPS proxy installer keeps credentials out of the repository", async () =
   assert.match(installer, /gzip_static on/);
   assert.match(
     installer,
+    /location = \/assets\/app-initial~app-main~page-BF1QkwFT\.js \{[\s\S]*?Cache-Control "no-cache"/,
+  );
+  assert.match(
+    installer,
+    /location = \/assets\/app-initial~app-main~hotkey-window-thread-page~thread-app-shell-chrome~header~remote-conver~h59fr3q5-Cm3GYhJA\.js \{[\s\S]*?Cache-Control "no-cache"/,
+  );
+  assert.match(
+    installer,
+    /location = \/assets\/app-initial~app-main~settings-page~appearance-settings~general-settings-DyXXbsyx\.js \{[\s\S]*?Cache-Control "no-cache"/,
+  );
+  assert.match(
+    installer,
+    /location = \/eink-theme\.js \{[\s\S]*?Cache-Control "no-cache"/,
+  );
+  assert.match(
+    installer,
+    /find \/srv\/codex-web\/webview -type f -name '\*\.gz' -exec chmod 644/,
+  );
+  assert.match(
+    installer,
+    /location = \/assets\/app-initial~app-main~appgen-settings-page~settings-page~skills-settings~plugins-settings~re~n7kg4zj6-CoJ-ih-g\.js \{[\s\S]*?Cache-Control "no-cache"/,
+  );
+  assert.match(
+    installer,
     /add_header Cache-Control "public, max-age=31536000, immutable" always;/,
   );
 });

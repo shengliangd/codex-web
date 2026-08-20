@@ -1,0 +1,45 @@
+--- a/webview/assets/app-initial~app-main~appgen-settings-page~settings-page~skills-settings~plugins-settings~re~n7kg4zj6-CoJ-ih-g.js
++++ b/webview/assets/app-initial~app-main~appgen-settings-page~settings-page~skills-settings~plugins-settings~re~n7kg4zj6-CoJ-ih-g.js
+@@ -12672,6 +12672,8 @@ export {
+   Xf as C,
+   ba as Cn,
+   tl as Ct,
++  Ea as CodexWebMouseSensor,
++  Oa as CodexWebTouchSensor,
+   zf as D,
+   co as Dn,
+   Yc as Dt,
+--- a/webview/assets/app-initial~app-main~page-BF1QkwFT.js
++++ b/webview/assets/app-initial~app-main~page-BF1QkwFT.js
+@@ -1999,6 +1999,8 @@ import {
+   At as Gm,
+   B as Km,
+   C as qm,
++  CodexWebMouseSensor as codexWebMouseSensor,
++  CodexWebTouchSensor as codexWebTouchSensor,
+   Cn as qme,
+   Ct as Jm,
+   D as Jme,
+@@ -47612,6 +47614,9 @@ function HBe(e, t) {
+       return null;
+   }
+ }
++var codexWebTouchSensorOptions = {
++  activationConstraint: { delay: 250, tolerance: 5 },
++};
+ var H2,
+   U2,
+   W2,
+@@ -47627,7 +47632,11 @@ function WBe(e) {
+   t[1] === Symbol.for(`react.memo_cache_sentinel`)
+     ? ((c = { coordinateGetter: ghe }), (t[1] = c))
+     : (c = t[1]);
+-  let l = rhe(rh(Ohe, s), rh(qme, c)),
++  let l = rhe(
++      rh(codexWebMouseSensor, s),
++      rh(codexWebTouchSensor, codexWebTouchSensorOptions),
++      rh(qme, c),
++    ),
+     [u, d] = (0, K2.useState)(null),
+     [f, p] = (0, K2.useState)(null),
+     m;
