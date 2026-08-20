@@ -43,6 +43,8 @@ patch --batch --forward --strip 1 --directory scratch/asar < patches/webview-use
 patch --batch --forward --strip 1 --directory scratch/asar < patches/webview-statsig-override-adapter.patch
 patch --batch --forward --strip 1 --directory scratch/asar < patches/webview-prompt-search-param.patch
 patch --batch --forward --strip 1 --directory scratch/asar < patches/webview-mobile-viewport.patch
+patch --batch --forward --strip 1 --directory scratch/asar < patches/webview-mobile-sidebar-touch-dnd.patch
+patch --batch --forward --strip 1 --directory scratch/asar < patches/webview-eink-theme.patch
 patch --batch --forward --strip 1 --directory scratch/asar < patches/sentry-disable-shell.patch
 patch --batch --forward --strip 1 --directory scratch/asar < patches/sentry-disable-webview.patch
 rm -rf scratch/asar/node_modules/better-sqlite3

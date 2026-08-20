@@ -1,0 +1,95 @@
+:root.electron-eink {
+  color-scheme: light;
+  --codex-titlebar-tint: #ffffff;
+  --color-background-button-tertiary: #ffffff;
+  --color-token-border: #4a4a4a;
+  --color-token-border-default: #4a4a4a;
+  --color-token-border-heavy: #000000;
+  --color-token-border-light: #767676;
+  --color-token-dropdown-background: #ffffff;
+  --color-token-focus-border: #000000;
+  --color-token-input-background: #ffffff;
+  --color-token-input-border: #000000;
+  --color-token-input-foreground: #101010;
+  --color-token-input-placeholder-foreground: #4a4a4a;
+  --color-token-main-surface-primary: #ffffff;
+  --color-token-menu-background: #ffffff;
+  --color-token-menu-border: #000000;
+  --color-token-side-bar-background: #ffffff;
+  --composer-top-tray-background: var(--color-token-side-bar-background);
+  --elevation-prominent: none;
+  --elevation-sidebar: none;
+  --elevation-stroke: none;
+  --shadow-100: none;
+  --shadow-200: none;
+  --shadow-300: none;
+  --shadow-400: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --transition-duration-basic: 0ms;
+  --transition-duration-relaxed: 0ms;
+}
+
+:root.electron-eink,
+:root.electron-eink body {
+  background: #ffffff;
+}
+
+:root.electron-eink *,
+:root.electron-eink *::before,
+:root.electron-eink *::after {
+  -webkit-backdrop-filter: none !important;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  transition-delay: 0ms !important;
+  transition-duration: 0.001ms !important;
+}
+
+:root.electron-eink [cmdk-root],
+:root.electron-eink [data-cmdk-root] {
+  background-color: var(--color-token-dropdown-background) !important;
+}
+
+:root.electron-eink [data-app-action-sidebar-scroll] {
+  background-color: #ffffff !important;
+  border-inline-end: 1px solid #000000;
+}
+
+:root.electron-eink [data-app-action-sidebar-thread-active="true"] {
+  background-color: #ffffff !important;
+  border-inline-start: 3px solid #000000;
+}
+
+:root.electron-eink
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+        [type="color"]
+      ):not([type="file"]),
+    textarea,
+    select
+  ),
+:root.electron-eink [data-codex-composer-root] {
+  background-color: #ffffff !important;
+  border: 1px solid #000000 !important;
+}
+
+:root.electron-eink
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+        [type="color"]
+      ):not([type="file"]),
+    textarea,
+    select
+  ):focus-visible,
+:root.electron-eink [data-codex-composer-root]:focus-within {
+  outline: 2px solid #000000 !important;
+  outline-offset: 1px;
+}
+
+:root.electron-eink dialog::backdrop {
+  background: #d7d7d7 !important;
+}

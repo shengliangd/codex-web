@@ -13,6 +13,9 @@ const readViewportSources = async () =>
     await read("assets/mobile-viewport.js"),
   ].join("\n");
 
+const readSidebarTouchDndPatch = () =>
+  read("patches/webview-mobile-sidebar-touch-dnd.patch");
+
 test("Android Chrome resizes the layout viewport when the keyboard opens", async () => {
   const viewportSources = await readViewportSources();
 
@@ -39,6 +42,36 @@ test("the bundled app shell follows the corrected root height", async () => {
     /#root\s*>\s*div\s*\{[^}]*height:\s*100%\s*!important/s,
   );
   assert.doesNotMatch(viewportCss, /data-codex-composer-root/);
+});
+
+test("mobile sidebar rows allow native vertical touch scrolling", async () => {
+  const viewportCss = await read("assets/mobile-viewport.css");
+
+  assert.match(viewportCss, /data-app-action-sidebar-scroll/);
+  assert.match(
+    viewportCss,
+    /\[role="listitem"\]\.touch-none\s*\{[^}]*touch-action:\s*pan-y\s*!important/s,
+  );
+  assert.match(viewportCss, /-webkit-overflow-scrolling:\s*touch/);
+  assert.match(viewportCss, /overscroll-behavior-y:\s*contain/);
+});
+
+test("mobile sidebar uses long-press touch dragging without replacing scrolling", async () => {
+  const patch = await readSidebarTouchDndPatch();
+  const prepareScript = await read("scripts/prepare_asar");
+
+  assert.match(patch, /Ea as CodexWebMouseSensor/);
+  assert.match(patch, /Oa as CodexWebTouchSensor/);
+  assert.match(patch, /delay:\s*250/);
+  assert.match(patch, /tolerance:\s*5/);
+  assert.match(patch, /rh\(codexWebMouseSensor, s\)/);
+  assert.match(
+    patch,
+    /rh\(codexWebTouchSensor, codexWebTouchSensorOptions\)/,
+  );
+  assert.match(patch, /^-  let l = rhe\(rh\(Ohe, s\), rh\(qme, c\)\),$/m);
+  assert.doesNotMatch(patch, /^\+.*rh\(Ohe, s\)/m);
+  assert.match(prepareScript, /webview-mobile-sidebar-touch-dnd\.patch/);
 });
 
 const runViewportScript = async ({ viewportHeight }) => {
