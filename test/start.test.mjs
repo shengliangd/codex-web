@@ -30,19 +30,17 @@ test("npm start routes to the repository launcher", async () => {
   assert.equal(command, "./scripts/start");
 });
 
-test("start uses the current checkout and the UID app-server socket", async () => {
+test("start uses the current checkout and the shared Codex app-server socket", async () => {
   // Given
   const temporaryRoot = await mkdtemp(
     path.join(os.tmpdir(), "codex-web-start-"),
   );
-  const socketDirectory = path.join(
-    temporaryRoot,
-    `codex-app-server-${process.getuid()}`,
-  );
-  const socketPath = path.join(socketDirectory, "control.sock");
+  const codexHome = path.join(temporaryRoot, "codex-home");
+  const socketDirectory = path.join(codexHome, "app-server-control");
+  const socketPath = path.join(socketDirectory, "app-server-control.sock");
   const binaryDirectory = path.join(temporaryRoot, "bin");
   const capturePath = path.join(temporaryRoot, "launch.txt");
-  await mkdir(socketDirectory);
+  await mkdir(socketDirectory, { recursive: true });
   await mkdir(binaryDirectory);
   await writeFile(
     path.join(binaryDirectory, "node"),
@@ -65,8 +63,8 @@ test("start uses the current checkout and the UID app-server socket", async () =
         env: {
           ...process.env,
           CAPTURE_PATH: capturePath,
+          CODEX_HOME: codexHome,
           PATH: `${binaryDirectory}:${process.env.PATH}`,
-          TMPDIR: temporaryRoot,
         },
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -90,6 +88,92 @@ test("start uses the current checkout and the UID app-server socket", async () =
   } finally {
     unixServer.close();
     await once(unixServer, "close");
+    await rm(temporaryRoot, { recursive: true });
+  }
+});
+
+test("start launches the shared Codex daemon when its default socket is missing", async () => {
+  const temporaryRoot = await mkdtemp(
+    path.join(os.tmpdir(), "codex-web-daemon-start-"),
+  );
+  const codexHome = path.join(temporaryRoot, "codex-home");
+  const socketPath = path.join(
+    codexHome,
+    "app-server-control",
+    "app-server-control.sock",
+  );
+  const binaryDirectory = path.join(temporaryRoot, "bin");
+  const daemonCapturePath = path.join(temporaryRoot, "daemon.txt");
+  const daemonPidPath = path.join(temporaryRoot, "daemon.pid");
+  const launchCapturePath = path.join(temporaryRoot, "launch.txt");
+  const helperPath = path.join(temporaryRoot, "daemon-helper.mjs");
+  await mkdir(binaryDirectory);
+  await writeFile(
+    helperPath,
+    `import { mkdirSync, writeFileSync } from "node:fs";
+import net from "node:net";
+import path from "node:path";
+mkdirSync(path.dirname(process.argv[2]), { recursive: true });
+const server = net.createServer();
+server.listen(process.argv[2], () => writeFileSync(process.argv[3], String(process.pid)));
+`,
+  );
+  await writeFile(
+    path.join(binaryDirectory, "codex"),
+    `#!/usr/bin/env bash
+printf '%s\n' "$@" >"$DAEMON_CAPTURE_PATH"
+nohup "$REAL_NODE" "$DAEMON_HELPER" "$DEFAULT_SOCKET" "$DAEMON_PID_PATH" >/dev/null 2>&1 &
+for _ in {1..100}; do
+  [[ -S "$DEFAULT_SOCKET" ]] && exit 0
+  sleep 0.01
+done
+exit 1
+`,
+  );
+  await writeFile(
+    path.join(binaryDirectory, "node"),
+    '#!/usr/bin/env bash\nprintf "%s\n" "$CODEX_UNIX_SOCKET" "$@" >"$LAUNCH_CAPTURE_PATH"\n',
+  );
+  await chmod(path.join(binaryDirectory, "codex"), 0o755);
+  await chmod(path.join(binaryDirectory, "node"), 0o755);
+
+  let daemonPid;
+  try {
+    const launcher = spawn(startScript, ["--port", "8316"], {
+      env: {
+        ...process.env,
+        CODEX_HOME: codexHome,
+        DAEMON_CAPTURE_PATH: daemonCapturePath,
+        DAEMON_HELPER: helperPath,
+        DAEMON_PID_PATH: daemonPidPath,
+        DEFAULT_SOCKET: socketPath,
+        LAUNCH_CAPTURE_PATH: launchCapturePath,
+        PATH: `${binaryDirectory}:${process.env.PATH}`,
+        REAL_NODE: process.execPath,
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const [exitCode] = await once(launcher, "close", {
+      signal: AbortSignal.timeout(4000),
+    });
+
+    assert.equal(exitCode, 0);
+    assert.deepEqual(
+      (await readFile(daemonCapturePath, "utf8")).trim().split("\n"),
+      ["app-server", "daemon", "start"],
+    );
+    assert.deepEqual(
+      (await readFile(launchCapturePath, "utf8")).trim().split("\n"),
+      [
+        socketPath,
+        path.join(repositoryRoot, "src/server/main.js"),
+        "--port",
+        "8316",
+      ],
+    );
+    daemonPid = Number(await readFile(daemonPidPath, "utf8"));
+  } finally {
+    if (daemonPid) process.kill(daemonPid, "SIGTERM");
     await rm(temporaryRoot, { recursive: true });
   }
 });
