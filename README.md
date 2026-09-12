@@ -23,11 +23,17 @@ to the codex desktop app can be integrated quickly.
 `codex-web` serves the browser client and hosts the desktop-side bridge. by
 default, it listens on `127.0.0.1:8214`.
 
-`npm start` connects to the per-user app-server socket at
-`/tmp/codex-app-server-$UID/control.sock`. if no app-server is running there, it
-starts one with `codex` from `PATH` and waits for it to become ready. set
-`CODEX_UNIX_SOCKET` to use another socket, or `CODEX_APP_SERVER_CLI` to select a
-different Codex CLI binary.
+`npm start` connects to the shared Codex app-server socket at
+`${CODEX_HOME:-$HOME/.codex}/app-server-control/app-server-control.sock`. if no
+app-server is running there, it starts the Codex daemon and waits for it to
+become ready. set `CODEX_UNIX_SOCKET` to use another socket, or
+`CODEX_APP_SERVER_CLI` to select a different Codex CLI binary.
+
+the launcher does not replace or install a system-wide `codex` wrapper. inside
+the codex-web process, it sets `CODEX_CLI_PATH` to the bundled
+`codex_remote_proxy` so the desktop runtime reuses that Unix-socket app-server.
+the original CLI is still used to start the app-server when the socket is
+missing.
 
 run it with `npx`:
 
@@ -42,6 +48,27 @@ nix run github:0xcaff/codex-web
 ```
 
 then open <http://127.0.0.1:8214> in a browser.
+
+### HTTPS setup and foreground launch
+
+after signing in with the Codex CLI, configure Nginx and run codex-web with one
+command. The listen address is deliberately required:
+
+```bash
+scripts/install-https-proxy --listen-address 127.0.0.1
+```
+
+to connect to a specific app-server socket instead of the shared default:
+
+```bash
+scripts/install-https-proxy --listen-address 127.0.0.1 --socket /absolute/path/to/app-server.sock
+```
+
+run this as your ordinary user, not with `sudo`; the command requests elevated
+access only while configuring Nginx. It remains attached to the terminal after
+setup. Press Ctrl-C to stop codex-web and use the same command to start it
+again. Use `0.0.0.0` only when remote access is intentional and protected by
+the host firewall.
 
 ### sign in
 

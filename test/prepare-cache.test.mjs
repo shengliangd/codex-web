@@ -17,3 +17,20 @@ test("prepare reuses a validated versioned Desktop archive", async () => {
   assert.match(prepare, /HOSTED_CODEX_APP_ZIP="\$ARCHIVE_PATH"/);
   assert.doesNotMatch(prepare, /mktemp -d/);
 });
+
+test("prepare_asar removes old extracted bundles before unpacking", async () => {
+  const prepareAsar = await read("scripts/prepare_asar");
+  const cleanupIndex = prepareAsar.indexOf(
+    "rm -rf -- scratch/ChatGPT.app scratch/asar",
+  );
+  const unzipIndex = prepareAsar.indexOf(
+    'unzip -o "$HOSTED_CODEX_APP_ZIP" -d scratch/',
+  );
+  const extractIndex = prepareAsar.indexOf(
+    'asar extract "scratch/ChatGPT.app/Contents/Resources/app.asar" "scratch/asar"',
+  );
+
+  assert.notEqual(cleanupIndex, -1);
+  assert.ok(cleanupIndex < unzipIndex);
+  assert.ok(unzipIndex < extractIndex);
+});

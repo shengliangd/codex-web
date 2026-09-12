@@ -26,7 +26,7 @@ test("hashed assets are compressed and cached without caching preload", async ()
     "utf8",
   );
 
-  assert.match(nginxConfig, /listen 8443 ssl http2;/);
+  assert.match(nginxConfig, /listen 127\.0\.0\.1:8443 ssl http2;/);
   assert.match(nginxConfig, /send_timeout 300s;/);
   assert.match(nginxConfig, /gzip_static on;/);
   assert.match(nginxConfig, /gzip_proxied any;/);
