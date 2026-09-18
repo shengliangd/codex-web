@@ -20,22 +20,22 @@ test("E-ink is registered as a native light theme", async () => {
 
   assert.equal(
     patch.match(/EINK: `eink`/g)?.length,
-    4,
+    3,
     "all Desktop settings schemas and the Webview must accept the E-ink theme ID",
   );
   assert.match(patch, /--- a\/\.vite\/build\/worker\.js/);
-  assert.match(patch, /--- a\/\.vite\/build\/src-Ct4P_yu5\.js/);
-  assert.match(
-    patch,
-    /--- a\/\.vite\/build\/child-process-snapshot-worker\.js/,
-  );
-  assert.match(patch, /D\(r\.EINK, `E-ink`/);
+  assert.match(patch, /--- a\/\.vite\/build\/src-VqXTPopo\.js/);
+  assert.doesNotMatch(patch, /child-process-snapshot-worker/);
+  assert.match(patch, /aY\(Y_\.EINK, `E-ink`/);
   assert.match(patch, /import\(`\.\.\/eink-light\.js`\)/);
-  assert.match(patch, /kn\.lightCodeThemeId/);
-  assert.match(patch, /classList\.toggle\(`electron-eink`/);
+  assert.match(patch, /Ev\.lightCodeThemeId/);
+  assert.match(patch, /classList\.toggle\(\s*\n\+\s*`electron-eink`/);
   assert.match(viewportPatch, /eink-theme\.css/);
   assert.doesNotMatch(viewportPatch, /eink-theme\.js/);
-  assert.doesNotMatch(prepareAsar, /rm -f scratch\/asar\/webview\/eink-theme\.js/);
+  assert.doesNotMatch(
+    prepareAsar,
+    /rm -f scratch\/asar\/webview\/eink-theme\.js/,
+  );
   assert.match(compatibilityShim, /Compatibility shim/);
   assert.doesNotMatch(
     compatibilityShim,

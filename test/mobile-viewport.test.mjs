@@ -60,17 +60,14 @@ test("mobile sidebar uses long-press touch dragging without replacing scrolling"
   const patch = await readSidebarTouchDndPatch();
   const prepareScript = await read("scripts/prepare_asar");
 
-  assert.match(patch, /Ea as CodexWebMouseSensor/);
-  assert.match(patch, /Oa as CodexWebTouchSensor/);
+  // The pinned bundle now keeps the mouse and touch sensors in the same module.
+  assert.match(patch, /rOe\(Uke, v\)/);
+  assert.match(patch, /rOe\(Gke, \{/);
+  assert.match(patch, /\.\.\.v/);
   assert.match(patch, /delay:\s*250/);
   assert.match(patch, /tolerance:\s*5/);
-  assert.match(patch, /rh\(codexWebMouseSensor, s\)/);
-  assert.match(
-    patch,
-    /rh\(codexWebTouchSensor, codexWebTouchSensorOptions\)/,
-  );
-  assert.match(patch, /^-  let l = rhe\(rh\(Ohe, s\), rh\(qme, c\)\),$/m);
-  assert.doesNotMatch(patch, /^\+.*rh\(Ohe, s\)/m);
+  assert.match(patch, /^-  let y = iOe\(rOe\(Bke, v\)\),$/m);
+  assert.doesNotMatch(patch, /^\+.*rOe\(Bke, v\)/m);
   assert.match(prepareScript, /webview-mobile-sidebar-touch-dnd\.patch/);
 });
 

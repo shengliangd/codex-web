@@ -1,6 +1,6 @@
 --- a/.vite/build/worker.js
 +++ b/.vite/build/worker.js
-@@ -42843,6 +42843,7 @@ var aW,
+@@ -45195,6 +45195,7 @@
      AYU: `ayu`,
      CATPPUCCIN: `catppuccin`,
      CODEX: `codex`,
@@ -8,10 +8,9 @@
      DRACULA: `dracula`,
      EVERFOREST: `everforest`,
      GITHUB: `github`,
---- a/.vite/build/src-Ct4P_yu5.js
-+++ b/.vite/build/src-Ct4P_yu5.js
-@@ -15362,7 +15362,8 @@
- var mw = {
+--- a/.vite/build/src-VqXTPopo.js
++++ b/.vite/build/src-VqXTPopo.js
+@@ -20142,6 +20142,7 @@
      AYU: `ayu`,
      CATPPUCCIN: `catppuccin`,
      CODEX: `codex`,
@@ -19,66 +18,40 @@
      DRACULA: `dracula`,
      EVERFOREST: `everforest`,
      GITHUB: `github`,
---- a/.vite/build/child-process-snapshot-worker.js
-+++ b/.vite/build/child-process-snapshot-worker.js
-@@ -12875,8 +12875,9 @@
- var eg = `default-service-tier`,
-   tg = {
-     AYU: `ayu`,
-     CATPPUCCIN: `catppuccin`,
-     CODEX: `codex`,
-+    EINK: `eink`,
-     DRACULA: `dracula`,
-     EVERFOREST: `everforest`,
-     GITHUB: `github`,
---- a/webview/assets/app-initial~app-main~hotkey-window-thread-page~thread-app-shell-chrome~header~remote-conver~h59fr3q5-Cm3GYhJA.js
-+++ b/webview/assets/app-initial~app-main~hotkey-window-thread-page~thread-app-shell-chrome~header~remote-conver~h59fr3q5-Cm3GYhJA.js
-@@ -23403,6 +23403,7 @@ var Bg,
+--- a/webview/assets/app-initial-236e1501144c.js
++++ b/webview/assets/app-initial-236e1501144c.js
+@@ -118039,6 +118039,7 @@
+       AYU: `ayu`,
        CATPPUCCIN: `catppuccin`,
        CODEX: `codex`,
-       DRACULA: `dracula`,
 +      EINK: `eink`,
+       DRACULA: `dracula`,
        EVERFOREST: `everforest`,
        GITHUB: `github`,
-       GRUVBOX: `gruvbox`,
---- a/webview/assets/app-initial~app-main~settings-page~appearance-settings~general-settings-DyXXbsyx.js
-+++ b/webview/assets/app-initial~app-main~settings-page~appearance-settings~general-settings-DyXXbsyx.js
-@@ -644,6 +644,12 @@ var L,
+@@ -340740,6 +340741,12 @@
              name: `Codex Light`,
            },
          }),
-+        D(r.EINK, `E-ink`, {
++        aY(Y_.EINK, `E-ink`, {
 +          light: {
 +            load: () => import(`../eink-light.js`),
 +            name: `E-ink`,
 +          },
 +        }),
-         E(r.DRACULA, `Dracula`, { dark: `dracula` }),
-         E(r.EVERFOREST, `Everforest`, {
+         iY(Y_.DRACULA, `Dracula`, { dark: `dracula` }),
+         iY(Y_.EVERFOREST, `Everforest`, {
            dark: `everforest-dark`,
---- a/webview/assets/app-initial~app-main~page-BF1QkwFT.js
-+++ b/webview/assets/app-initial~app-main~page-BF1QkwFT.js
-@@ -69161,7 +69161,9 @@ function PYe({ children: e }) {
-     f = u ?? !0,
-     p = xg(o, `light`),
-     m = xg(s, `dark`),
--    h = a === `light` ? p : m;
-+    h = a === `light` ? p : m,
-+    g = Zo(kn.lightCodeThemeId),
-+    _ = a === `light` && g === `eink`;
-   return (
-     Kn(`step-font-size`, ({ delta: e }) => {
-       let n = (e, t, n) => Math.min(n, Math.max(t, e)),
-@@ -69215,8 +69217,10 @@ function PYe({ children: e }) {
-         for (let [e, t] of Object.entries(RYe)) i[e] = `${Math.round(t * r)}px`;
-         (mg(e, i), mg(n, i));
-       }
--      (NYe() && qge(e, h, a), Kl(t));
--    }, [h, a, l, f, c, t, d]),
-+      (e.classList.toggle(`electron-eink`, _),
-+        NYe() && qge(e, h, a),
-+        Kl(t));
-+    }, [h, a, l, f, c, t, d, _]),
-     (0, b8.useLayoutEffect)(() => {
-       let e = document.querySelector(`[data-codex-window-type="electron"]`);
-       if (e) {
+@@ -417851,6 +417858,13 @@
+   t[3] !== l || t[4] !== v
+     ? ((y = v_a(l, `dark`, v)), (t[3] = l), (t[4] = v), (t[5] = y))
+     : (y = t[5]);
++  const codexWebLightTheme = mO(Ev.lightCodeThemeId);
++  (0, l3.useLayoutEffect)(() => {
++    document.documentElement.classList.toggle(
++      `electron-eink`,
++      s === `light` && codexWebLightTheme === `eink`,
++    );
++  }, [s, codexWebLightTheme]);
+   let b = s === `light` ? _ : y,
+     x =
+       b.fonts.codeFace != null ||

@@ -378,8 +378,6 @@ async function getWorkspaceDirectoryEntries({
 }
 
 function ensureElectronLikeProcessContext(): void {
-  process.env.BUILD_FLAVOR = "prod";
-
   const versions = process.versions as NodeJS.ProcessVersions & {
     electron?: string;
   };

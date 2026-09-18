@@ -6,6 +6,7 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  readdir,
   rm,
   writeFile,
 } from "node:fs/promises";
@@ -14,6 +15,33 @@ import path from "node:path";
 import test from "node:test";
 
 const installerPath = path.resolve("scripts/install-https-proxy");
+
+test("all patched hashed assets revalidate in both HTTPS configurations", async () => {
+  const configurations = await Promise.all([
+    readFile(installerPath, "utf8"),
+    readFile("examples/nginx/codex-web.conf", "utf8"),
+  ]);
+  const patches = await Promise.all(
+    (await readdir("patches"))
+      .filter((name) => name.endsWith(".patch"))
+      .map((name) => readFile(`patches/${name}`, "utf8")),
+  );
+  const assets = new Set(
+    patches.flatMap((patch) =>
+      [...patch.matchAll(/^\+\+\+ b\/webview\/(assets\/.+)$/gm)].map(
+        (match) => match[1],
+      ),
+    ),
+  );
+  assert.ok(assets.size > 0);
+  for (const config of configurations) {
+    for (const asset of assets) {
+      const block = config.split(`location = /${asset} {`)[1]?.split("}")[0];
+      assert.ok(block, `missing cache rule for ${asset}`);
+      assert.match(block, /Cache-Control "no-cache"/);
+    }
+  }
+});
 
 test("setup requires an explicit safe HTTPS listen address", () => {
   const missing = spawnSync(installerPath, [], { encoding: "utf8" });
@@ -131,13 +159,7 @@ test("one public command configures Nginx then enters the foreground launcher", 
     );
     assert.deepEqual(
       (await readFile(startCapture, "utf8")).trim().split("\n"),
-      [
-        "/run/user/1000/codex.sock",
-        "--host",
-        "127.0.0.1",
-        "--port",
-        "8214",
-      ],
+      ["/run/user/1000/codex.sock", "--host", "127.0.0.1", "--port", "8214"],
     );
     assert.match(launch.stderr, /Starting codex-web in the foreground/);
   } finally {
@@ -194,27 +216,11 @@ test("setup configures Nginx before starting codex-web in front", async () => {
   assert.match(installer, /chmod 600 \/etc\/nginx\/conf\.d\/codex-web\.conf/);
   assert.match(
     installer,
-    /location = \/assets\/app-initial~app-main~page-BF1QkwFT\.js \{[\s\S]*?Cache-Control "no-cache"/,
-  );
-  assert.match(
-    installer,
-    /location = \/assets\/app-initial~app-main~hotkey-window-thread-page~thread-app-shell-chrome~header~remote-conver~h59fr3q5-Cm3GYhJA\.js \{[\s\S]*?Cache-Control "no-cache"/,
-  );
-  assert.match(
-    installer,
-    /location = \/assets\/app-initial~app-main~settings-page~appearance-settings~general-settings-DyXXbsyx\.js \{[\s\S]*?Cache-Control "no-cache"/,
-  );
-  assert.match(
-    installer,
     /location = \/eink-theme\.js \{[\s\S]*?Cache-Control "no-cache"/,
   );
   assert.match(
     installer,
     /find "\$\{webview_stage\}" -type f -name '\*\.gz' -exec chmod 644/,
-  );
-  assert.match(
-    installer,
-    /location = \/assets\/app-initial~app-main~appgen-settings-page~settings-page~skills-settings~plugins-settings~re~n7kg4zj6-CoJ-ih-g\.js \{[\s\S]*?Cache-Control "no-cache"/,
   );
   assert.match(
     installer,

@@ -1,25 +1,14 @@
 --- a/webview/index.html
 +++ b/webview/index.html
-@@ -6,7 +6,10 @@
-     <!-- PROD_CSP_TAG_HERE -->
-     <script type="module" src="./assets/preload.js"></script>
+@@ -7,3 +7,3 @@
      <meta charset="UTF-8" />
 -    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-+    <meta
-+      name="viewport"
-+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
-+    />
-     <title>Codex</title>
-     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-     <link rel="manifest" href="/manifest.json" />
-@@ -161,6 +164,10 @@
-       crossorigin
-       href="./assets/app-initial~app-main~hotkey-window-thread-page~thread-app-shell-chrome~header~remote-conver~h59fr3q5-gcDk1du5.css"
++    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+     <title>ChatGPT</title>
+@@ -158,2 +158,6 @@
      />
 +    <link rel="stylesheet" href="./app-shell-tabs.css" />
 +    <link rel="stylesheet" href="./mobile-viewport.css" />
 +    <link rel="stylesheet" href="./eink-theme.css" />
 +    <script src="./mobile-viewport.js"></script>
    </head>
-   <body tabindex="0" style="outline: none">
-     <div id="root">

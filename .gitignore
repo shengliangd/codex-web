@@ -5,3 +5,8 @@ sentry
 /src/server/**/*.js.map
 /src/server/**/*.d.ts
 /src/server/**/*.d.ts.map
+
+# Desktop runtime state stored in the host working directory.
+/browser-sidebar-page-states.json
+/statsig-state.json
+/statsig-state.json.bak
