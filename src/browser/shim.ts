@@ -613,6 +613,14 @@ ensureSocket();
 
 export const contextBridge = {
   exposeInMainWorld(_key: string, _api: unknown): void {
+    if (_key === "electronBridge" && isRecord(_api)) {
+      // Upstream falls back to its web menus when the native capability is absent.
+      // The browser host cannot display Electron's Menu.popup().
+      const browserApi = { ..._api };
+      delete browserApi.showContextMenu;
+      Reflect.set(window, _key, browserApi);
+      return;
+    }
     Reflect.set(window, _key, _api);
   },
 };
