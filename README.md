@@ -76,6 +76,10 @@ setup. Press Ctrl-C to stop codex-web and use the same command to start it
 again. Use `0.0.0.0` only when remote access is intentional and protected by
 the host firewall.
 
+Desktop archives are cached in `${XDG_CACHE_HOME:-$HOME/.cache}/codex-web`
+(or `CODEX_WEB_CACHE_DIR` when set). Rebuilds validate and reuse the archive
+for the pinned version; only a missing or corrupt archive is downloaded.
+
 ### sign in
 
 ensure the codex cli on the host machine is signed in before starting the
