@@ -40,6 +40,11 @@ nix run github:0xcaff/codex-web
 
 then open <http://127.0.0.1:8214> in a browser.
 
+### Mobile
+
+Mobile layouts follow the visible viewport when the keyboard opens. Sidebar
+rows scroll normally and use a long press to start dragging.
+
 ### sign in
 
 ensure the codex cli on the host machine is signed in before starting the

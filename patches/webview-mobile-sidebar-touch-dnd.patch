@@ -1,0 +1,17 @@
+--- a/webview/assets/app-initial-236e1501144c.js
++++ b/webview/assets/app-initial-236e1501144c.js
+@@ -369992,7 +369992,13 @@
+       }),
+       (t[5] = v))
+     : (v = t[5]);
+-  let y = iOe(rOe(Bke, v)),
++  let y = iOe(
++      rOe(Uke, v),
++      rOe(Gke, {
++        ...v,
++        activationConstraint: { delay: 250, tolerance: 5 },
++      }),
++    ),
+     [b, x] = (0, B$.useState)(null),
+     [S, C] = (0, B$.useState)(null),
+     [w, T] = (0, B$.useState)(!1),

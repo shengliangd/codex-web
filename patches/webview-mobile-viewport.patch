@@ -1,0 +1,12 @@
+--- a/webview/index.html
++++ b/webview/index.html
+@@ -7,3 +7,3 @@
+     <meta charset="UTF-8" />
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+     <title>ChatGPT</title>
+@@ -158,2 +158,4 @@
+     />
++    <link rel="stylesheet" href="./mobile-viewport.css" />
++    <script src="./mobile-viewport.js"></script>
+   </head>

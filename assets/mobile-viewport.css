@@ -1,0 +1,45 @@
+:root {
+  --codex-mobile-viewport-height: 100dvh;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  html,
+  body {
+    width: 100%;
+    height: var(--codex-mobile-viewport-height) !important;
+    max-height: var(--codex-mobile-viewport-height);
+    overflow: hidden;
+  }
+
+  body {
+    overscroll-behavior: none;
+  }
+
+  #root {
+    height: 100% !important;
+    min-height: 0;
+    min-block-size: 0;
+    overflow: hidden;
+  }
+
+  #root > div {
+    height: 100% !important;
+    max-height: 100%;
+    min-height: 0;
+  }
+
+  [data-app-action-sidebar-scroll] {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+
+  [data-app-action-sidebar-scroll] [role="listitem"].touch-none {
+    touch-action: pan-y !important;
+  }
+
+  [data-thread-scroll-footer="true"] {
+    box-sizing: border-box;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
