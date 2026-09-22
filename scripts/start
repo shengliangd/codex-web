@@ -4,6 +4,7 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repository_root="$(dirname -- "${script_dir}")"
 server_entry="${repository_root}/src/server/main.js"
+codex_app_fallback='mcp_servers.codex_app={command="",enabled=false}'
 
 if [[ ! -f "${server_entry}" ]]; then
   echo "codex-web is not built; run npm run prepare first" >&2
@@ -34,12 +35,13 @@ if [[ ! -S "${CODEX_UNIX_SOCKET}" ]]; then
   install -d -m 700 "${socket_directory}"
   if [[ "${uses_default_socket}" == true ]]; then
     echo "Starting the shared Codex app-server daemon at ${CODEX_UNIX_SOCKET}" >&2
-    "${codex_app_server_cli}" app-server daemon start
+    "${codex_app_server_cli}" app-server daemon start \
+      -c "${codex_app_fallback}"
     app_server_pid=""
   else
     app_server_log="${CODEX_APP_SERVER_LOG:-${socket_directory}/app-server.log}"
     echo "Starting Codex app-server at ${CODEX_UNIX_SOCKET}" >&2
-    nohup "${codex_app_server_cli}" app-server \
+    nohup "${codex_app_server_cli}" -c "${codex_app_fallback}" app-server \
       --listen "unix://${CODEX_UNIX_SOCKET}" \
       >> "${app_server_log}" 2>&1 < /dev/null &
     app_server_pid=$!

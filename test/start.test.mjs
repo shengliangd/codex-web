@@ -160,7 +160,13 @@ exit 1
     assert.equal(exitCode, 0);
     assert.deepEqual(
       (await readFile(daemonCapturePath, "utf8")).trim().split("\n"),
-      ["app-server", "daemon", "start"],
+      [
+        "app-server",
+        "daemon",
+        "start",
+        "-c",
+        'mcp_servers.codex_app={command="",enabled=false}',
+      ],
     );
     assert.deepEqual(
       (await readFile(launchCapturePath, "utf8")).trim().split("\n"),
@@ -202,7 +208,8 @@ server.listen(process.argv[2], () => writeFileSync(process.argv[3], String(proce
     path.join(binaryDirectory, "codex"),
     `#!/usr/bin/env bash
 printf '%s\\n' "$@" >"$APP_SERVER_CAPTURE_PATH"
-socket="\${3#unix://}"
+listen_arg="\${@: -1}"
+socket="\${listen_arg#unix://}"
 exec "$REAL_NODE" "$APP_SERVER_HELPER" "$socket" "$APP_SERVER_PID_PATH"
 `,
   );
@@ -237,7 +244,13 @@ exec "$REAL_NODE" "$APP_SERVER_HELPER" "$socket" "$APP_SERVER_PID_PATH"
     assert.equal(exitCode, 0);
     assert.deepEqual(
       (await readFile(appServerCapturePath, "utf8")).trim().split("\n"),
-      ["app-server", "--listen", `unix://${socketPath}`],
+      [
+        "-c",
+        'mcp_servers.codex_app={command="",enabled=false}',
+        "app-server",
+        "--listen",
+        `unix://${socketPath}`,
+      ],
     );
     assert.deepEqual(
       (await readFile(launchCapturePath, "utf8")).trim().split("\n"),
