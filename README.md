@@ -45,6 +45,10 @@ then open <http://127.0.0.1:8214> in a browser.
 Mobile layouts follow the visible viewport when the keyboard opens. Sidebar
 rows scroll normally and use a long press to start dragging.
 
+### E-ink
+
+For monochrome displays, choose the E-ink light theme in Appearance settings.
+
 ### sign in
 
 ensure the codex cli on the host machine is signed in before starting the

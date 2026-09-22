@@ -636,6 +636,18 @@ class BrowserWindow {
     this.visible = false;
   }
 
+  setBackgroundColor(value: string): void {
+    log(`BrowserWindow#${this.id}.setBackgroundColor`, [value]);
+  }
+
+  setBackgroundMaterial(value: unknown): void {
+    log(`BrowserWindow#${this.id}.setBackgroundMaterial`, [value]);
+  }
+
+  setVibrancy(value: unknown): void {
+    log(`BrowserWindow#${this.id}.setVibrancy`, [value]);
+  }
+
   focus(): void {
     log(`BrowserWindow#${this.id}.focus`, []);
     BrowserWindow.focusedWindow = this;

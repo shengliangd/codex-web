@@ -1,0 +1,57 @@
+--- a/.vite/build/worker.js
++++ b/.vite/build/worker.js
+@@ -45195,6 +45195,7 @@
+     AYU: `ayu`,
+     CATPPUCCIN: `catppuccin`,
+     CODEX: `codex`,
++    EINK: `eink`,
+     DRACULA: `dracula`,
+     EVERFOREST: `everforest`,
+     GITHUB: `github`,
+--- a/.vite/build/src-VqXTPopo.js
++++ b/.vite/build/src-VqXTPopo.js
+@@ -20142,6 +20142,7 @@
+     AYU: `ayu`,
+     CATPPUCCIN: `catppuccin`,
+     CODEX: `codex`,
++    EINK: `eink`,
+     DRACULA: `dracula`,
+     EVERFOREST: `everforest`,
+     GITHUB: `github`,
+--- a/webview/assets/app-initial-236e1501144c.js
++++ b/webview/assets/app-initial-236e1501144c.js
+@@ -118039,6 +118039,7 @@
+       AYU: `ayu`,
+       CATPPUCCIN: `catppuccin`,
+       CODEX: `codex`,
++      EINK: `eink`,
+       DRACULA: `dracula`,
+       EVERFOREST: `everforest`,
+       GITHUB: `github`,
+@@ -340740,6 +340741,12 @@
+             name: `Codex Light`,
+           },
+         }),
++        aY(Y_.EINK, `E-ink`, {
++          light: {
++            load: () => import(`../eink-light.js`),
++            name: `E-ink`,
++          },
++        }),
+         iY(Y_.DRACULA, `Dracula`, { dark: `dracula` }),
+         iY(Y_.EVERFOREST, `Everforest`, {
+           dark: `everforest-dark`,
+@@ -417851,6 +417858,13 @@
+   t[3] !== l || t[4] !== v
+     ? ((y = v_a(l, `dark`, v)), (t[3] = l), (t[4] = v), (t[5] = y))
+     : (y = t[5]);
++  const codexWebLightTheme = mO(Ev.lightCodeThemeId);
++  (0, l3.useLayoutEffect)(() => {
++    document.documentElement.classList.toggle(
++      `electron-eink`,
++      s === `light` && codexWebLightTheme === `eink`,
++    );
++  }, [s, codexWebLightTheme]);
+   let b = s === `light` ? _ : y,
+     x =
+       b.fonts.codeFace != null ||
