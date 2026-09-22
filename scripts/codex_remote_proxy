@@ -17,10 +17,9 @@ fi
 # Ignore remaining args (for compatibility with codex app-server invocations).
 shift || true
 
-# Websocat defaults to 64KiB max message size, which causes warnings and
-# message splitting for larger app-server payloads. Use a safer default while
-# still allowing runtime override.
+# Keep a generous payload limit for large app-server responses. Use the Node
+# bridge so the launcher does not require a separate websocat installation.
 CODEX_BUFFER_SIZE="${CODEX_BUFFER_SIZE:-104857600}"
 CODEX_UNIX_SOCKET="${CODEX_UNIX_SOCKET:?CODEX_UNIX_SOCKET must be set}"
 
-exec websocat -E -t -B "${CODEX_BUFFER_SIZE}" - "ws-c:unix:${CODEX_UNIX_SOCKET}"
+exec node "$(dirname "${BASH_SOURCE[0]}")/codex_unix_socket_bridge.cjs"

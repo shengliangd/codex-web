@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repository_root="$(dirname -- "${script_dir}")"
+server_entry="${repository_root}/src/server/main.js"
+
+if [[ ! -f "${server_entry}" ]]; then
+  echo "codex-web is not built; run npm run prepare first" >&2
+  exit 1
+fi
+
+uses_default_socket=false
+if [[ -z "${CODEX_UNIX_SOCKET:-}" ]]; then
+  CODEX_UNIX_SOCKET="${CODEX_HOME:-${HOME}/.codex}/app-server-control/app-server-control.sock"
+  uses_default_socket=true
+fi
+if [[ ! -S "${CODEX_UNIX_SOCKET}" ]]; then
+  if [[ -e "${CODEX_UNIX_SOCKET}" ]]; then
+    echo "Codex app-server path exists but is not a socket: ${CODEX_UNIX_SOCKET}" >&2
+    exit 1
+  fi
+
+  codex_app_server_cli="${CODEX_APP_SERVER_CLI:-${CODEX_CLI_PATH:-}}"
+  if [[ -z "${codex_app_server_cli}" ]]; then
+    codex_app_server_cli="$(command -v codex || true)"
+  fi
+  if [[ -z "${codex_app_server_cli}" ]]; then
+    echo "Codex CLI not found; install codex or set CODEX_APP_SERVER_CLI" >&2
+    exit 1
+  fi
+
+  socket_directory="$(dirname -- "${CODEX_UNIX_SOCKET}")"
+  install -d -m 700 "${socket_directory}"
+  if [[ "${uses_default_socket}" == true ]]; then
+    echo "Starting the shared Codex app-server daemon at ${CODEX_UNIX_SOCKET}" >&2
+    "${codex_app_server_cli}" app-server daemon start
+    app_server_pid=""
+  else
+    app_server_log="${CODEX_APP_SERVER_LOG:-${socket_directory}/app-server.log}"
+    echo "Starting Codex app-server at ${CODEX_UNIX_SOCKET}" >&2
+    nohup "${codex_app_server_cli}" app-server \
+      --listen "unix://${CODEX_UNIX_SOCKET}" \
+      >> "${app_server_log}" 2>&1 < /dev/null &
+    app_server_pid=$!
+  fi
+
+  for _ in {1..100}; do
+    [[ -S "${CODEX_UNIX_SOCKET}" ]] && break
+    if [[ -n "${app_server_pid}" ]] && ! kill -0 "${app_server_pid}" 2>/dev/null; then
+      wait "${app_server_pid}" || true
+      echo "Codex app-server exited before creating its socket; log: ${app_server_log}" >&2
+      tail -n 20 "${app_server_log}" >&2 || true
+      exit 1
+    fi
+    sleep 0.05
+  done
+
+  if [[ ! -S "${CODEX_UNIX_SOCKET}" ]]; then
+    if [[ -n "${app_server_pid}" ]]; then
+      kill "${app_server_pid}" 2>/dev/null || true
+      echo "Timed out waiting for Codex app-server; log: ${app_server_log}" >&2
+    else
+      echo "Timed out waiting for shared Codex app-server: ${CODEX_UNIX_SOCKET}" >&2
+    fi
+    exit 1
+  fi
+fi
+
+export CODEX_UNIX_SOCKET
+export CODEX_CLI_PATH="${script_dir}/codex_remote_proxy"
+
+exec node "${server_entry}" "$@"

@@ -23,8 +23,17 @@ to the codex desktop app can be integrated quickly.
 `codex-web` serves the browser client and hosts the desktop-side bridge. by
 default, it listens on `127.0.0.1:8214`.
 
-it will use `codex` from `PATH` if available, or `CODEX_CLI_PATH` if you set
-it.
+`npm start` connects to the shared Codex app-server socket at
+`${CODEX_HOME:-$HOME/.codex}/app-server-control/app-server-control.sock`. if no
+app-server is running there, it starts the Codex daemon and waits for it to
+become ready. set `CODEX_UNIX_SOCKET` to use another socket, or
+`CODEX_APP_SERVER_CLI` to select a different Codex CLI binary.
+
+the launcher does not replace or install a system-wide `codex` wrapper. inside
+the codex-web process, it sets `CODEX_CLI_PATH` to the bundled
+`codex_remote_proxy` so the desktop runtime reuses that Unix-socket app-server.
+the original CLI is still used to start the app-server when the socket is
+missing.
 
 run it with `npx`:
 
@@ -40,14 +49,32 @@ nix run github:0xcaff/codex-web
 
 then open <http://127.0.0.1:8214> in a browser.
 
-### Mobile
+### Mobile and E-ink
 
 Mobile layouts follow the visible viewport when the keyboard opens. Sidebar
-rows scroll normally and use a long press to start dragging.
+rows scroll normally and use a long press to start dragging. For monochrome
+displays, choose the E-ink light theme in Appearance settings.
 
-### E-ink
+### HTTPS setup and foreground launch
 
-For monochrome displays, choose the E-ink light theme in Appearance settings.
+after signing in with the Codex CLI, configure Nginx and run codex-web with one
+command. The listen address is deliberately required:
+
+```bash
+scripts/install-https-proxy --listen-address 127.0.0.1
+```
+
+to connect to a specific app-server socket instead of the shared default:
+
+```bash
+scripts/install-https-proxy --listen-address 127.0.0.1 --socket /absolute/path/to/app-server.sock
+```
+
+run this as your ordinary user, not with `sudo`; the command requests elevated
+access only while configuring Nginx. It remains attached to the terminal after
+setup. Press Ctrl-C to stop codex-web and use the same command to start it
+again. Use `0.0.0.0` only when remote access is intentional and protected by
+the host firewall.
 
 ### sign in
 
